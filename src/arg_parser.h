@@ -370,6 +370,7 @@ void parse_benchmark_arguments(int argc, char **argv, benchmark_config_t *out)
       .restrict_free_ram_to = parser.free_ram_if_selected,
       .drop_cache_first = parser.drop_cache_was_selected,
       .do_reread = parser.reread_was_selected,
+      .delete_afterwards = parser.delete_afterwards_was_selected,
   };
   memcpy(out, &config, sizeof(benchmark_config_t));
 }
