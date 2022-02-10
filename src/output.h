@@ -41,6 +41,7 @@ static void print_config(const benchmark_config_t *config)
   fprintf(stdout, "\"%s\": %s,\n", "use_o_direct", config->use_o_direct ? "true" : "false");
   fprintf(stdout, "\"%s\": %s,\n", "drop_cache_first", config->drop_cache_first ? "true" : "false");
   fprintf(stdout, "\"%s\": %s,\n", "reread_every_block", config->do_reread ? "true" : "false");
+  fprintf(stdout, "\"%s\": %s,\n", "delete_afterwards", config->delete_afterwards ? "true" : "false");
 }
 
 static void print_results(const benchmark_results_t *results)
