@@ -224,6 +224,13 @@ static inline void check_needs_to_wrap(const benchmark_config_parser_t *config, 
     argp_error(state, "When reading sequentially, we need a file buffer size of at least access_size * number_of_tests bytes");
 }
 
+static inline void check_does_not_try_to_delete_special_file(const benchmark_config_parser_t *config, struct argp_state *state)
+{
+  if (config->prepare_file_size && config->delete_afterwards_was_selected)
+    argp_error(state, "You can't delete a special file like '%s'\n--delete-afterwards is invalid here",
+        config->filepath);
+}
+
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
   benchmark_config_parser_t *config = state->input;
@@ -288,6 +295,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     check_access_size_larger_mem_buf(config, state);
     check_access_size_larger_file_buf(config, state);
     check_needs_to_wrap(config, state);
+    check_does_not_try_to_delete_special_file(config, state);
     break;
   }
   return 0;
