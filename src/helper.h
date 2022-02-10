@@ -197,6 +197,14 @@ void io_op_worked_or_die(int res, bool is_read_operation)
   }
 }
 
+void remove_or_die(const char *pathname) {
+  int res = remove(pathname);
+  if (res == -1) {
+    fprintf(stderr, "ERROR: Could not delete '%s' with error '%s'\n", pathname, strerror(errno));
+    exit(1);
+  }
+}
+
 void strn_to_lower(char *str, size_t n)
 {
   /* If n unspecified (i.e. 0) we use the full string. */

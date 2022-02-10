@@ -20,7 +20,7 @@
 
 const char *DEFAULT_FILENAME = "io_benchmark_test_file.dat";
 const char *DEFAULT_FILEPATH = "/tmp/io_benchmark_test_file.dat";
-const char *argp_program_bug_address = "[SOME GIT ISSUES LINK]";
+const char *argp_program_bug_address = "https://gitlab.gwdg.de/lars.quentin1/io-benchmark/-/issues";
 const char *argp_program_version = "0.1.0";
 
 typedef struct benchmark_config_parser_t
@@ -41,6 +41,7 @@ typedef struct benchmark_config_parser_t
   bool o_direct_was_selected;
   bool drop_cache_was_selected;
   bool reread_was_selected;
+  bool delete_afterwards_was_selected;
   size_t number_of_missing_arugments;
 } benchmark_config_parser_t;
 
@@ -66,6 +67,7 @@ typedef enum argp_index_values_t
   ID_USE_O_DIRECT = 2402,
   ID_DROP_CACHE = 2403,
   ID_DO_REREAD = 2404,
+  ID_DELETE_AFTERWARDS = 2405,
 } argp_index_values_t;
 
 // TODO put me in helper
@@ -222,6 +224,13 @@ static inline void check_needs_to_wrap(const benchmark_config_parser_t *config, 
     argp_error(state, "When reading sequentially, we need a file buffer size of at least access_size * number_of_tests bytes");
 }
 
+static inline void check_does_not_try_to_delete_special_file(const benchmark_config_parser_t *config, struct argp_state *state)
+{
+  if (config->prepare_file_size && config->delete_afterwards_was_selected)
+    argp_error(state, "You can't delete a special file like '%s'\n--delete-afterwards is invalid here",
+        config->filepath);
+}
+
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
   benchmark_config_parser_t *config = state->input;
@@ -276,6 +285,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
   case ID_DO_REREAD:
     config->reread_was_selected = true;
     break;
+  case ID_DELETE_AFTERWARDS:
+    config->delete_afterwards_was_selected = true;
+    break;
   case ARGP_KEY_END:
     check_argument_numbers(config, state);
     check_read_and_write(config, state);
@@ -283,6 +295,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     check_access_size_larger_mem_buf(config, state);
     check_access_size_larger_file_buf(config, state);
     check_needs_to_wrap(config, state);
+    check_does_not_try_to_delete_special_file(config, state);
     break;
   }
   return 0;
@@ -317,6 +330,7 @@ static struct argp_option options[] = {
     {"o-direct", ID_USE_O_DIRECT, 0, OPTION_ARG_OPTIONAL, "Use O_DIRECT to bypass the VFS page cache"},
     {"drop-cache", ID_DROP_CACHE, 0, OPTION_ARG_OPTIONAL, "Before doing anything, ask Linux to drop the page cache"},
     {"reread", ID_DO_REREAD, 0, OPTION_ARG_OPTIONAL, "Read every block twice, just benchmark the second time."},
+    {"delete-afterwards", ID_DELETE_AFTERWARDS, 0, OPTION_ARG_OPTIONAL, "Delete benchmarking file afterwards"},
 
     /* -1 is the default group. Let's give it a name. */
     {0, 0, 0, 0, "Miscellaneous:", -1},
@@ -326,7 +340,7 @@ static struct argp argp = {
     options,
     parse_opt,
     "--read|--write --file-pattern=MODE --mem-pattern=MODE --file=[PATH] --repeats=N --mem-buf=BYTES "
-    "--file-buf=BYTES --access-size=BYTES [--free-ram=BYTES] [--o-direct] [--drop-cache] [--reread]",
+    "--file-buf=BYTES --access-size=BYTES [--free-ram=BYTES] [--o-direct] [--drop-cache] [--reread] [--delete-afterwards]",
     "Note: read or write are mutually exclusive\v"
     "The file given will be overwritten, be careful when specifying it."};
 
@@ -342,6 +356,7 @@ void parse_benchmark_arguments(int argc, char **argv, benchmark_config_t *out)
       .o_direct_was_selected = false,
       .drop_cache_was_selected = false,
       .reread_was_selected = false,
+      .delete_afterwards_was_selected = false,
 
       /* |{pattern1,pattern2,repeats,mem_buf,file_buf,accss_size}| = 6 */
       .number_of_missing_arugments = 6,
@@ -363,6 +378,7 @@ void parse_benchmark_arguments(int argc, char **argv, benchmark_config_t *out)
       .restrict_free_ram_to = parser.free_ram_if_selected,
       .drop_cache_first = parser.drop_cache_was_selected,
       .do_reread = parser.reread_was_selected,
+      .delete_afterwards = parser.delete_afterwards_was_selected,
   };
   memcpy(out, &config, sizeof(benchmark_config_t));
 }

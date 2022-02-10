@@ -73,6 +73,8 @@ typedef struct benchmark_config_t
 
   const bool do_reread;
 
+  const bool delete_afterwards;
+
   const size_t restrict_free_ram_to;
 } benchmark_config_t;
 
@@ -326,7 +328,13 @@ static void do_benchmark(const benchmark_config_t *config, benchmark_state_t *st
     pick_next_file_position(config, state);
     results->durations[i] = get_duration(&start, &end);
   }
+}
+
+static void do_cleanup(const benchmark_config_t *config, benchmark_state_t *state) {
   close_or_die(state->fd);
+  if (config->delete_afterwards) {
+    remove_or_die(config->filepath);
+  }
 }
 
 /** Wrapper-function.
@@ -345,6 +353,8 @@ benchmark_results_t *benchmark_file(const benchmark_config_t *config)
   init_results(config, results);
 
   do_benchmark(config, &state, results);
+
+  do_cleanup(config, &state);
   return results;
 }
 
