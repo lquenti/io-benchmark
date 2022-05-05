@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <argp.h>
 #include <stdbool.h>
+#include<stdlib.h>
 
 #include "io_benchmark.h"
 #include "arg_parser.h"
