@@ -7,7 +7,7 @@ make-build-folder: clean
 	mkdir build
 
 build: make-build-folder
-	gcc -Wall -Wextra -Wpedantic -std=gnu11 -O2 -D_GNU_SOURCE -o ./build/io-benchmark.exe ./src/main.c -lrt
+	gcc -Wall -Wextra -Wpedantic -std=gnu11 -O2 -D_GNU_SOURCE -o ./build/io-benchmark.exe ./src/*.c -lrt
 
 show-help: build
 	./build/io-benchmark.exe --help
