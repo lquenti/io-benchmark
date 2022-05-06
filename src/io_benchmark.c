@@ -15,7 +15,6 @@
 #include <time.h>
 
 #include"io_benchmark.h"
-#include "helper.h"
 
 // Notes:
 // Which clocks to use:

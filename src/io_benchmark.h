@@ -5,6 +5,8 @@
 #include<stdbool.h>
 #include<unistd.h>
 
+#include "helper.h"
+
 /** All possible access patterns. */
 typedef enum access_pattern_t
 {
