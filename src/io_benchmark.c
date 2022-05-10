@@ -237,6 +237,7 @@ static void do_cleanup(const benchmark_config_t *config, benchmark_state_t *stat
   if (config->delete_afterwards) {
     remove_or_die(config->filepath);
   }
+  free(state->buffer);
 }
 
 /** Wrapper-function.
